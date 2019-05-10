@@ -7,6 +7,8 @@ const moment = require('moment')
 const AWS = require('aws-sdk');
 var dir = 'zips';
 
+const log = (level, string) => console.log(`${level}: ${string}`)
+
 if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
 }
@@ -26,7 +28,7 @@ const uploadFile = (fileName) => {
         };
         s3.upload(params, (s3Err, data) => {
             if (s3Err) throw s3Err
-            console.log(`File uploaded successfully at ${data.Location}`)
+            log("info", `File uploaded successfully at ${data.Location}`)
         });
     });
 };
@@ -50,16 +52,16 @@ const zipDirectory = (source, out) => {
 const saveMongoState = () => {
     exec(`mongodump -h ${process.env.MONGO_URL} --forceTableScan`, (err, stdout, stderr) => {
         if (err) {
-            console.log("Error executing mongodump, no save were made")
-            console.log(err)
+            log("error", "Error executing mongodump, no save were made")
+            log("error", JSON.stringify(err))
             return;
         }
-        console.log(stderr)
-        console.log("Zipping database...")
+        log("info", JSON.stringify({ output: stderr }))
+        log("info", "Zipping database...")
         setTimeout(async () => {
             const fileName = `${dir}/waapi-linkedin-save-${moment().format("YYYY-MM-DD HH:mm")}.zip`
             await zipDirectory("./dump", fileName)
-            console.log("Uploading to S3...")
+            log("info", "Uploading to S3...")
             uploadFile(fileName);
         }, 2000)
     });
