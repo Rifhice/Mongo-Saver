@@ -54,6 +54,7 @@ const saveMongoState = () => {
             console.log(err)
             return;
         }
+	console.log(stderr)
 	console.log("Zipping database")
         setTimeout(async () => {
             const fileName = `${dir}/waapi-linkedin-save-${moment().format("YYYY-MM-DD HH:mm")}.zip`
